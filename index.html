@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba técnica</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Inventario</h1>
+</body>
+
+<div class="contPrincipal">
+    <div class="contFormulario">
+        <div class="contFormulario">
+            <label>Nombre del producto</label>
+            <input class="inputCampos" id="nombreProducto">
+            <br>
+            <label>Cantidad</label>
+            <input class="inputCampos" id="cantidadProducto">
+            <br>
+            <label>Precio de compra</label>
+            <input class="inputCampos" id="precioCompraProducto">
+            <br>
+            <label>Precio de venta</label>
+            <input class="inputCampos" id="precioVentaProducto">
+            <br>
+            <button type="botonRegistrar" class="btn" id="registrarProducto">Registrar</button>
+        </div>
+        <div class="contTabla">
+            <table class="table" id="tablaProductos">
+                <thead>
+                  <tr>
+                    <th scope="col">Nombre del producto</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Precio de compra</th>
+                    <th scope="col">Precio de venta</th>
+                    <th scope="col"> </th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoTablaProductos">
+                    <!-- Las filas se agregarán aquí -->
+                </tbody>
+                
+              </table>
+              <div class="totalesTitulo">Totales</div>
+              <div class="totalesSubtitulo">Costo total del inventario: <span id="costoTotalInventario">0</span></div>
+              <div class="totalesSubtitulo">Total de ventas: <span id="totalVentas">0</span></div>
+              <div class="totalesSubtitulo">Ganancia total: <span id="gananciaTotal">0</span></div>
+              
+        
+        <script>
+            let productos  = [];
+            let tabla = document.getElementById("tablaProductos");
+            let nombreProd = "";
+            let cantidadProd = "";
+            let precioCom = "";
+            let precioVent = "";
+
+            // Evento para el botón de agregar
+            const eventoAgregar = document.getElementById('registrarProducto');
+
+            if(eventoAgregar) {
+                eventoAgregar.addEventListener('click', function(event) {
+                    nombreProd = document.getElementById("nombreProducto").value;
+                    cantidadProd = document.getElementById("cantidadProducto").value;
+                    precioCom = document.getElementById("precioCompraProducto").value;
+                    precioVent = document.getElementById("precioVentaProducto").value;
+
+                    // Verificar si el producto ya existe
+                    if (!productoExiste(nombreProd)) {
+                        agregarProductos(nombreProd, cantidadProd, precioCom, precioVent);
+                        agregarProductosATabla(nombreProd, cantidadProd, precioCom, precioVent);
+                    } else {
+                        alert("El producto ya está registrado");
+                    }
+
+                    // Limpiar los inputs después de agregar
+                    document.getElementById("nombreProducto").value = "";
+                    document.getElementById("cantidadProducto").value = "";
+                    document.getElementById("precioCompraProducto").value = "";
+                    document.getElementById("precioVentaProducto").value = "";
+                });
+            }          
+
+            // Función para verificar si un producto existe en el arreglo
+            function productoExiste(nombre) {
+                return productos.some(producto => producto.nombre === nombre); 
+            }
+
+            // Función para agregar productos al arreglo 
+            function agregarProductos(nombre, cantidad, precioCompra, precioVenta) {
+                let producto = {
+                    nombre: nombre,
+                    cantidad: cantidad,
+                    precioCompra: precioCompra,
+                    precioVenta: precioVenta
+                };
+                productos.push(producto);
+                console.log(productos);
+            }
+
+            // Función para agregar productos a la tabla
+            function agregarProductosATabla(nombre, cantidad, precioCompra, precioVenta) {
+                let fila = tabla.insertRow(); 
+                
+                let celdaNombre = fila.insertCell(0);
+                let celdaCantidad = fila.insertCell(1);
+                let celdaPrecioCompra = fila.insertCell(2);
+                let celdaPrecioVenta = fila.insertCell(3);
+                let celdaEliminar = fila.insertCell(4);
+
+                celdaNombre.innerHTML = nombre;
+                celdaCantidad.innerHTML = cantidad;
+                celdaPrecioCompra.innerHTML = precioCompra;
+                celdaPrecioVenta.innerHTML = precioVenta;
+
+                let btnEliminar = document.createElement('button');
+                btnEliminar.innerHTML = "Eliminar";
+                btnEliminar.onclick = function() {
+                    eliminarProducto(nombre); 
+                };
+                celdaEliminar.appendChild(btnEliminar);
+                actualizarTotales();
+            }
+
+            // Función para eliminar productos del arreglo  
+            function eliminarProducto(nombre) {
+                let indice = productos.findIndex(producto => producto.nombre === nombre);
+
+                if (indice !== -1) {
+                    productos.splice(indice, 1); 
+                    eliminarProductoDeTabla(nombre); 
+                    alert(`El producto "${nombre}" ha sido eliminado.`);
+                } else {
+                    alert("Producto no encontrado.");
+                }
+                actualizarTotales();
+            }
+
+            // Función para eliminar productos de la tabla 
+            function eliminarProductoDeTabla(nombre) {
+                let tabla = document.getElementById("tablaProductos");
+                for (let i = 0; i < tabla.rows.length; i++) {
+                    if (tabla.rows[i].cells[0].innerText === nombre) {
+                        tabla.deleteRow(i);
+                        break;
+                    }
+                }
+            }
+
+            // Función para calcular y mostrar los totales
+            function actualizarTotales() {
+                let costoTotal = 0;
+                let totalVentas = 0;
+                let gananciaTotal = 0;
+
+                productos.forEach(producto => {
+                    let cantidad = parseFloat(producto.cantidad);
+                    let precioCompra = parseFloat(producto.precioCompra);
+                    let precioVenta = parseFloat(producto.precioVenta);
+
+                    costoTotal += precioCompra;
+                    totalVentas += precioVenta;
+                });
+
+                gananciaTotal = totalVentas - costoTotal;
+
+                document.getElementById("costoTotalInventario").innerText = costoTotal.toFixed(2);
+                document.getElementById("totalVentas").innerText = totalVentas.toFixed(2);
+                document.getElementById("gananciaTotal").innerText = gananciaTotal.toFixed(2);
+            }
+
+        </script>
+    </div>
+
+</div>
+</html>
